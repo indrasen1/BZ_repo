@@ -27,7 +27,7 @@ class BZ_solver():
         -> BZ propagator (returns derivative)
         -> Full Runge-Kutta 
         -> Notebook display function
-        -> Function to convert to animation
+        -> Function to convert to animatioN
     '''
     
     def __init__( self, params=None ):
@@ -55,8 +55,10 @@ class BZ_solver():
             params['tSteps'] = 1000
             params['dt'] = 0.1
             
-            params['species'] = [0, 1]
-            params['t_arr'] = [0, 500//3, 1000//3, 1500//3, 2000//3]
+            #select the forced species and time steps
+            params['species'] = [0]
+            params['t_arr'] = [0]
+            #params['t_arr'] = [0, 500//3, 1000//3, 1500//3, 2000//3]
             
         
         #initialize basic parameters
@@ -134,6 +136,19 @@ class BZ_solver():
             
             P_loc, S_loc = self.loadPng( params['imgName'] )
             
+        
+        elif params['loadPng_allSpecies'] is True:
+            
+            P_loc, S_loc = self.loadPng_3species( params['imgNameList'] )
+            
+        
+        #if the species are not specified
+        #stack along species dimension
+        #this allows for single species specification as well as other cases
+        #repeat thrice for the maximum possible 3 species in the chemistry
+        if P_loc.ndim == 2:
+            P_loc = np.repeat( P_loc[..., np.newaxis], 3, axis=2 )
+            S_loc = np.repeat( S_loc[..., np.newaxis], 3, axis=2 )
             
             
         #write code snippet here to initialize the forcing functions
@@ -149,29 +164,50 @@ class BZ_solver():
         else:
             self.species = params['species']
         
+        
+        #P is the multiplicative forcing function
+        #S is the additive forcing function
         self.P = np.ones_like( self.X_arr )
         self.S = np.zeros_like( self.X_arr )
         
         
         for t in self.t_arr:
             for s in self.species:
-                self.P[..., s, t] = P_loc
-                self.S[..., s, t] = S_loc
+                self.P[..., s, t] = P_loc[..., s]
+                self.S[..., s, t] = S_loc[..., s]
         
         
         #define the Laplacian for the discrete diffusion term
         self.L = np.array([[0.25, 0.5, 0.25], [0.5, -3, 0.5], [0.25, 0.5, 0.25]])
     
-    def displForcing( self ):
-        #helper function to display the forcing functions
+    def displForcing( self, tLoc = 0 ):
+        #helper function to display the forcing function at a particular time step
+        #default time step is 0
+        #forcing function displayed for all forced species
+        nS = len(self.species)
+        print('NUMBER OF FORCED SPECIES ' + str(nS) )
         
-        fig, ax = plt.subplots( nrows=1, ncols=2, figsize=(12, 5) )
+        fig, ax = plt.subplots( nrows=nS, ncols=2, figsize=(12, 6*nS), squeeze=False )
+        print('DISPLAYING FORCING FUNCTION FOR EACH SPECIES IN ORDER')
         
-        h0 = ax[0].imshow( self.P[..., self.species[0], self.t_arr[0] ] )
-        h1 = ax[1].imshow( self.S[..., self.species[0], self.t_arr[0] ] )
+        for iS in range(nS):
+            #print('DISPLAYING FORCING FUNCTION FOR SPECIES ' + str(self.species[iS]))
+            h0 = ax[iS, 0].imshow( self.P[..., self.species[iS], tLoc], cmap='gray' )
+            h1 = ax[iS, 1].imshow( self.S[..., self.species[iS], tLoc], cmap='gray' )
+            fig.colorbar( h0, ax=ax[iS, 0], fraction=0.046, pad=0.04 )
+            fig.colorbar( h1, ax=ax[iS, 1], fraction=0.046, pad=0.04 )
+            
+            time.sleep(0.01)
+            
+            
         
-        fig.colorbar(h0, ax=ax[0])
-        fig.colorbar(h1, ax=ax[1])
+        plt.show()
+        
+        #h0 = ax[0].imshow( self.P[..., self.species[0], self.t_arr[0] ] )
+        #h1 = ax[1].imshow( self.S[..., self.species[0], self.t_arr[0] ] )
+        
+        #fig.colorbar(h0, ax=ax[0])
+        #fig.colorbar(h1, ax=ax[1])
         
         
     def propagator( self, X_f ):
@@ -199,6 +235,7 @@ class BZ_solver():
     def solver_RK4( self ):
         #run the solver and populate the full array
         #most time consuming aspect of the problem
+        #is it necessary to retain a generic forcing function?
         
         start = timeit.timeit()
         
@@ -247,12 +284,19 @@ class BZ_solver():
             clear_output(wait=True)
             plt.pause(0.01)
         
-    def displTimeProgression( self, loc ):
+    def displTimeProgression( self, loc, tMask=None ):
         #function to display the time progression at a given location
         
-        plt.plot( self.X_arr[loc[0], loc[1], 0, :] )
-        plt.plot( self.X_arr[loc[0], loc[1], 1, :] )
-        plt.plot( self.X_arr[loc[0], loc[1], 2, :] )
+        if tMask is None:
+            tMax = np.shape(self.X_arr)[-1]
+            tMask = np.linspace(0, tMax, tMax)
+            
+        else:
+            tMax = int(np.amax(tMask))
+        
+        plt.plot( tMask, self.X_arr[loc[0], loc[1], 0, :tMax] )
+        plt.plot( tMask, self.X_arr[loc[0], loc[1], 1, :tMax] )
+        plt.plot( tMask, self.X_arr[loc[0], loc[1], 2, :tMax] )
         
         plt.title('TIME PROGRESSION')
         plt.legend(['A', 'B', 'C'])
@@ -365,7 +409,7 @@ class BZ_solver():
         img_loc = plt.imread(imgName)
         sMin = min(img_loc.shape[:2])
         
-        img_crop = img_loc[:sMin, :sMin, ...]
+        img_crop = np.mean( img_loc[:sMin, :sMin, ...], axis=-1 )
         
         #plt.imshow(img_crop[..., 1], cmap='gray')
         
@@ -376,8 +420,8 @@ class BZ_solver():
         print(img_resampled.shape)
         
         print('FINAL RESAMPLED AND CROPPED IMAGE:')
-        img_out = np.mean(img_resampled, axis=-1)
-        img_out = img_out / np.amax(img_out)
+        #img_out = np.mean(img_resampled, axis=-1)
+        img_out = img_resampled / np.amax(img_resampled)
         
         plt.imshow( img_out, cmap='gray')
         
@@ -385,6 +429,55 @@ class BZ_solver():
         S_ = img_out
         
         return P_, S_
+    
+    
+    #supply list of names of images
+    #one image for each species, in order
+    def loadPng_3species(self, imgNames):
+        
+        n = self.n
+        iS = 0
+        
+        P_ = np.ones( (n, n, 3) )
+        S_ = np.zeros( (n, n, 3) )
+        
+        fig, axs = plt.subplots(nrows = 3, ncols=1, figsize=(6, 18) )
+        
+        #resample each input image independently
+        for localName in imgNames:
+            
+            img_loc = plt.imread(localName)
+            sMin = min(img_loc.shape[:2])
+            
+            #last axis is RGB color: just average along these before resampling
+            img_crop = np.mean( img_loc[:sMin, :sMin, ...], axis=-1 )
+            
+            img_resampled = sp.signal.resample( img_crop, num=n, axis=0 )
+            img_resampled = sp.signal.resample( img_resampled, num=n, axis=1 )
+            
+            #print(img_crop.shape)
+            #print(img_resampled.shape)
+            
+            axs[iS].set_title('CROPPED IMAGE FOR SPECIES ' + str(iS) )
+            #img_out = np.mean(img_resampled, axis=-1)
+            img_out = img_resampled / np.amax(img_resampled)
+            
+            axs[iS].imshow( img_out, cmap='gray')
+            
+            time.sleep(0.01)
+            
+            P_[..., iS] = (img_out != 0 )
+            S_[..., iS] = img_out 
+            
+            iS = iS + 1
+            if iS == 3:
+                plt.show()
+                break
+        
+        plt.show()
+                
+        return P_, S_
+            
     
     
     def generateAnimation( self, species=0, cmapName='RdPu_r', fName='test.mp4' ):
@@ -415,7 +508,6 @@ class BZ_solver():
 
         ani.save(filename=fName, writer=writer)
         plt.show()
-        
         
         
 if __name__ == 'main':
