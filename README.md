@@ -24,9 +24,9 @@ $$ \frac{dA}{dt} = k_1 AB - k_2 AC - d_A \nabla^{2} A $$
 (the concentration current is proportional to the local concentration gradient, and the rate of change is the negative of the divergence of the concentration current)
 
 These three above equations are solved with regular time discretization and spatial discretization in a Cartesian grid. 
-The Laplacian is implemented through convolution with a 3x3 stencil representation. The equations are propagated in time through a 4th order Runge Kutta method.
+The Laplacian is implemented through convolution with a 3x3 stencil approximation. The equations are propagated in time through a 4th order Runge Kutta method.
 
-The functions are implemented through a BZ solver class and example inputs and execution 
+The functions are implemented through a BZ solver class with example inputs and execution provided in the notebook 'BZ_solver_test.ipynb'
 
 # Description of inputs and visualization
 
