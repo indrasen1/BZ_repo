@@ -8,9 +8,9 @@ The BZ_solver.py module implements a simple numerical testbed to approximate the
 The reaction-diffusion system is treated through the time evolution of 2D spatial distributions of three species.
 At each point in space, the following model for the BZ system is used where A, B and C represent the concentration of the species:
 
-$ A + B \rightarrow 2A $
-$ B + C \rightarrow 2B $
-$ C + A \rightarrow 2C $
+$$ A + B \rightarrow 2A $$
+$$ B + C \rightarrow 2B $$
+$$ C + A \rightarrow 2C $$
 
 
 This leads to the following ordinary differential equation:  
