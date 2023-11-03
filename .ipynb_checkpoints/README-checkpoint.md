@@ -59,6 +59,17 @@ Other types of boundary conditions would be interesting to implement.
 
 Consider saving intermediate results to disk via hdf5 for further propagation, computations and visualization.  
 
+## Example simulation snapshot
+
+In the notebook 'BZ_solver_test_parametric.ipynb', an example has been provided for a heart-shaped initialization.
+One of the three species is initialized through a parametric heart-shaped equation and the time evolution is observed.
+The snapshot below shows a time intermediate of one of the species that was not initialized with the heart forcing function.
+(Note: all the species are initialized with a small random noise along with the input forcing function).
+It is interesting to observe the wave-like features and dynamic oscillations in the species concentration map.
+
+![Snapshot of the evolution of a species](20231103_heartExample.png)
+
+
 ### Data acknowledgements
 
 20231018_testImg.png is from the website 'thispersondoesnotexist.com'  
