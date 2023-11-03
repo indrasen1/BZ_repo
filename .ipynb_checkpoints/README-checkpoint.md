@@ -1,4 +1,4 @@
-# Readme file for Belousov-Zhabotinsky(BZ) simulation:
+# 2-Dimensional Belousov-Zhabotinsky(BZ) simulation:
 
 Environment file: 'testEnvironment.yml'
 Notebook showing example usage: 'BZ_solver_test.ipynb'
