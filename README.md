@@ -9,7 +9,11 @@ The reaction-diffusion system is treated through the time evolution of 2D spatia
 At each point in space, the following model for the BZ system is used where A, B and C represent the concentration of the species:
 
 $$ A + B \rightarrow 2A $$
+
+Similarly, for the second species B:
 $$ B + C \rightarrow 2B $$
+
+And for the third C:
 $$ C + A \rightarrow 2C $$
 
 
