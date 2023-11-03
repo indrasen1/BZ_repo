@@ -11,9 +11,11 @@ At each point in space, the following model for the BZ system is used where A, B
 $$ A + B \rightarrow 2A $$
 
 Similarly, for the second species B:
+
 $$ B + C \rightarrow 2B $$
 
 And for the third C:
+
 $$ C + A \rightarrow 2C $$
 
 
