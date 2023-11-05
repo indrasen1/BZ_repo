@@ -1,4 +1,4 @@
-# 2-Dimensional Belousov-Zhabotinsky(BZ) simulation:
+# 2D Belousov-Zhabotinsky(BZ) simulation:
 
 Environment file: 'testEnvironment.yml'.
 
